@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaCosmos — Drug Reference Atlas</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #020408;
+    --surface: #050c14;
+    --card: #071220;
+    --border: rgba(0,200,255,0.15);
+    --accent: #00c8ff;
+    --accent2: #7b2fff;
+    --accent3: #00ff9d;
+    --warn: #ff6b35;
+    --text: #c8e8f8;
+    --muted: #4a7a9b;
+    --glow: 0 0 20px rgba(0,200,255,0.4);
+    --glow2: 0 0 20px rgba(123,47,255,0.4);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior:smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size:16px;
+    overflow-x:hidden;
+  }
+
+  /* ── STAR FIELD ── */
+  #starfield {
+    position: fixed; inset:0; z-index:0;
+    pointer-events:none;
+    background: radial-gradient(ellipse at 20% 30%, rgba(0,60,120,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(60,0,120,0.2) 0%, transparent 60%),
+                var(--bg);
+  }
+  .star {
+    position:absolute; border-radius:50%;
+    background:#fff; animation: twinkle var(--d,3s) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%,100%{opacity:var(--o,.6);transform:scale(1);}
+    50%{opacity:.1;transform:scale(.6);}
+  }
+
+  /* ── HERO ── */
+  #hero {
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center; padding:2rem;
+    overflow:hidden;
+  }
+
+  .hero-ring {
+    position:absolute;
+    border-radius:50%;
+    border:1px solid;
+    animation: spin var(--s,20s) linear infinite;
+  }
+  .hero-ring:nth-child(1){width:600px;height:600px;border-color:rgba(0,200,255,.1);--s:30s;}
+  .hero-ring:nth-child(2){width:450px;height:450px;border-color:rgba(123,47,255,.15);--s:20s;animation-direction:reverse;}
+  .hero-ring:nth-child(3){width:300px;height:300px;border-color:rgba(0,255,157,.1);--s:15s;}
+
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .molecule-dot {
+    position:absolute; width:8px; height:8px; border-radius:50%;
+    background: var(--accent); box-shadow: var(--glow);
+    animation: orbit var(--t,8s) linear infinite;
+  }
+  @keyframes orbit {
+    from{transform:rotate(0) translateX(var(--r,200px)) rotate(0);}
+    to{transform:rotate(360deg) translateX(var(--r,200px)) rotate(-360deg);}
+  }
+
+  .hero-badge {
+    font-family:'Share Tech Mono'; font-size:.7rem;
+    letter-spacing:.3em; color:var(--accent); text-transform:uppercase;
+    background: rgba(0,200,255,.08); border:1px solid rgba(0,200,255,.2);
+    padding:.4rem 1.2rem; border-radius:2rem; margin-bottom:1.5rem;
+    animation: fadeUp .8s .2s both;
+  }
+
+  h1 {
+    font-family:'Orbitron'; font-weight:900;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    line-height:1; letter-spacing:-.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+    animation: fadeUp .8s .4s both;
+    margin-bottom:.5rem;
+  }
+
+  .hero-sub {
+    font-family:'Orbitron'; font-size:clamp(1rem,2vw,1.4rem);
+    font-weight:400; color:var(--accent3); letter-spacing:.2em;
+    animation: fadeUp .8s .5s both;
+    margin-bottom:1.5rem;
+  }
+
+  .hero-desc {
+    max-width:560px; font-size:1.1rem; color:var(--muted);
+    line-height:1.7; animation: fadeUp .8s .6s both;
+    margin-bottom:2.5rem;
+  }
+
+  .hero-stats {
+    display:flex; gap:3rem; animation: fadeUp .8s .7s both;
+    margin-bottom:3rem;
+  }
+  .stat { text-align:center; }
+  .stat-num {
+    font-family:'Orbitron'; font-size:2.2rem; font-weight:700;
+    color:var(--accent);
+  }
+  .stat-label { font-size:.8rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+
+  .cta-btn {
+    display:inline-flex; align-items:center; gap:.6rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color:#fff; font-family:'Orbitron'; font-size:.85rem;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:.9rem 2.5rem; border-radius:4px;
+    text-decoration:none; border:none; cursor:pointer;
+    box-shadow: 0 4px 30px rgba(0,200,255,.3);
+    animation: fadeUp .8s .8s both;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .cta-btn:hover { transform:translateY(-3px); box-shadow:0 8px 40px rgba(0,200,255,.5); }
+
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(24px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* ── NAV ── */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.9rem 3rem;
+    background: rgba(2,4,8,.85);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-logo {
+    font-family:'Orbitron'; font-weight:900; font-size:1.1rem;
+    color:var(--accent); letter-spacing:.05em;
+  }
+  .nav-links { display:flex; gap:2rem; list-style:none; }
+  .nav-links a {
+    color:var(--muted); text-decoration:none; font-size:.85rem;
+    letter-spacing:.05em; text-transform:uppercase;
+    transition:color .2s;
+  }
+  .nav-links a:hover { color:var(--accent); }
+
+  /* ── SECTIONS ── */
+  section { position:relative; z-index:1; }
+
+  .section-header {
+    text-align:center; padding:5rem 2rem 3rem;
+  }
+  .section-tag {
+    font-family:'Share Tech Mono'; font-size:.7rem; letter-spacing:.3em;
+    color:var(--accent); text-transform:uppercase; margin-bottom:1rem;
+  }
+  .section-title {
+    font-family:'Orbitron'; font-size:clamp(1.8rem,4vw,3rem);
+    font-weight:700; color:#fff; margin-bottom:1rem;
+  }
+  .section-line {
+    width:60px; height:3px; margin:0 auto;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* ── CATEGORIES ── */
+  #categories { padding: 2rem 4rem 4rem; }
+
+  .cat-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+    gap:1rem; max-width:1400px; margin:0 auto;
+  }
+
+  .cat-pill {
+    cursor:pointer;
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem .8rem;
+    text-align:center;
+    transition: all .25s;
+    position:relative; overflow:hidden;
+  }
+  .cat-pill::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(0,200,255,.05), rgba(123,47,255,.05));
+    opacity:0; transition:opacity .25s;
+  }
+  .cat-pill:hover::before, .cat-pill.active::before { opacity:1; }
+  .cat-pill:hover, .cat-pill.active {
+    border-color:var(--accent);
+    box-shadow: 0 0 20px rgba(0,200,255,.2);
+    transform:translateY(-2px);
+  }
+  .cat-icon { font-size:1.6rem; margin-bottom:.4rem; }
+  .cat-name {
+    font-size:.8rem; font-weight:600; color:var(--text); letter-spacing:.03em;
+    text-transform:uppercase;
+  }
+  .cat-count { font-family:'Share Tech Mono'; font-size:.65rem; color:var(--muted); }
+
+  /* ── SEARCH ── */
+  #search-section { padding:0 4rem 3rem; max-width:1400px; margin:0 auto; }
+  .search-bar {
+    display:flex; align-items:center; gap:1rem;
+    background: var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:.8rem 1.5rem;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-bar:focus-within {
+    border-color:var(--accent);
+    box-shadow:0 0 20px rgba(0,200,255,.15);
+  }
+  .search-bar input {
+    flex:1; background:none; border:none; outline:none;
+    color:var(--text); font-family:'Rajdhani'; font-size:1rem;
+    placeholder-color:var(--muted);
+  }
+  .search-bar input::placeholder { color:var(--muted); }
+  .search-icon { color:var(--accent); font-size:1.1rem; }
+
+  /* ── DRUG GRID ── */
+  #drugs-section { padding:2rem 4rem 6rem; max-width:1400px; margin:0 auto; }
+
+  .drugs-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px,1fr));
+    gap:1.5rem;
+  }
+
+  .drug-card {
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    transition: all .3s;
+    cursor:pointer;
+    position:relative;
+  }
+  .drug-card::after {
+    content:''; position:absolute; top:0; left:0; right:0;
+    height:2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform:scaleX(0); transform-origin:left;
+    transition:transform .3s;
+  }
+  .drug-card:hover::after { transform:scaleX(1); }
+  .drug-card:hover {
+    border-color:rgba(0,200,255,.3);
+    box-shadow:0 8px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,200,255,.1);
+    transform:translateY(-4px);
+  }
+
+  .card-header {
+    padding:1.2rem 1.5rem .8rem;
+    display:flex; align-items:flex-start; gap:1rem;
+    border-bottom:1px solid var(--border);
+    background: linear-gradient(135deg, rgba(0,200,255,.04), rgba(123,47,255,.04));
+  }
+  .drug-icon {
+    width:48px; height:48px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; flex-shrink:0;
+    background:var(--surface); border:1px solid var(--border);
+  }
+  .drug-name {
+    font-family:'Orbitron'; font-size:.95rem; font-weight:700;
+    color:#fff; letter-spacing:.03em; margin-bottom:.2rem;
+  }
+  .drug-class {
+    font-size:.75rem; color:var(--accent); letter-spacing:.08em;
+    text-transform:uppercase;
+    font-family:'Share Tech Mono';
+  }
+  .drug-num {
+    margin-left:auto; font-family:'Share Tech Mono'; font-size:.65rem;
+    color:var(--muted); flex-shrink:0;
+  }
+
+  .card-body { padding:1rem 1.5rem; }
+
+  .prop-row {
+    display:flex; gap:.5rem; margin-bottom:.5rem;
+    font-size:.82rem; line-height:1.5;
+  }
+  .prop-label {
+    font-family:'Share Tech Mono'; font-size:.68rem;
+    color:var(--accent3); min-width:80px; flex-shrink:0; padding-top:.1rem;
+    letter-spacing:.05em;
+  }
+  .prop-val { color:var(--text); }
+
+  .drug-tags {
+    display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.8rem;
+  }
+  .tag {
+    font-size:.65rem; letter-spacing:.06em; text-transform:uppercase;
+    padding:.25rem .6rem; border-radius:3px;
+    font-family:'Share Tech Mono';
+  }
+  .tag-dose { background:rgba(255,107,53,.1); color:var(--warn); border:1px solid rgba(255,107,53,.2); }
+  .tag-form { background:rgba(0,200,255,.08); color:var(--accent); border:1px solid rgba(0,200,255,.15); }
+  .tag-cat { background:rgba(123,47,255,.1); color:#b88fff; border:1px solid rgba(123,47,255,.2); }
+
+  .struct-formula {
+    font-family:'Share Tech Mono'; font-size:.72rem;
+    color:var(--accent2); background:rgba(123,47,255,.07);
+    border:1px solid rgba(123,47,255,.15);
+    border-radius:6px; padding:.4rem .8rem;
+    margin-top:.8rem; letter-spacing:.04em;
+  }
+
+  /* HIDDEN ── SHOW ON SEARCH/FILTER */
+  .drug-card.hidden { display:none; }
+
+  /* ── NO RESULTS ── */
+  #no-results {
+    display:none; text-align:center; padding:4rem;
+    color:var(--muted); font-family:'Share Tech Mono';
+  }
+
+  /* ── CREDITS ── */
+  #credits {
+    position:relative; z-index:1;
+    background: var(--surface);
+    border-top:1px solid var(--border);
+    padding:6rem 2rem;
+    text-align:center;
+    overflow:hidden;
+  }
+  .credits-bg {
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 100%, rgba(0,200,255,.07) 0%, transparent 60%);
+  }
+  .credits-inner { position:relative; }
+
+  .credits-dna {
+    font-size:3rem; margin-bottom:1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+
+  .credits-title {
+    font-family:'Orbitron'; font-size:.75rem; letter-spacing:.5em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:2rem;
+  }
+
+  .credits-name {
+    font-family:'Orbitron'; font-weight:900;
+    font-size:clamp(2.5rem,6vw,5rem);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:1rem;
+    letter-spacing:.04em;
+  }
+
+  .credits-role {
+    font-family:'Share Tech Mono'; font-size:.9rem;
+    color:var(--muted); letter-spacing:.2em; margin-bottom:2rem;
+  }
+
+  .credits-divider {
+    width:120px; height:1px; margin:2rem auto;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .credits-copy {
+    font-size:.85rem; color:var(--muted); line-height:1.8;
+  }
+  .credits-copy span { color:var(--accent3); }
+
+  .credits-badge {
+    display:inline-flex; align-items:center; gap:.5rem;
+    margin-top:2rem;
+    background: rgba(0,200,255,.05); border:1px solid rgba(0,200,255,.15);
+    padding:.6rem 1.5rem; border-radius:2rem;
+    font-family:'Share Tech Mono'; font-size:.7rem;
+    color:var(--accent); letter-spacing:.15em;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:rgba(0,200,255,.3); border-radius:3px; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px) {
+    nav { padding:.8rem 1.5rem; }
+    .nav-links { display:none; }
+    #categories, #search-section, #drugs-section { padding-left:1.5rem; padding-right:1.5rem; }
+    .drugs-grid { grid-template-columns:1fr; }
+    .hero-stats { gap:2rem; }
+  }
+
+  /* ── COUNT BADGE ── */
+  #results-count {
+    font-family:'Share Tech Mono'; font-size:.75rem; color:var(--muted);
+    text-align:center; padding:.5rem 0 1.5rem;
+    letter-spacing:.1em;
+  }
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⬡ PharmaCosmos</div>
+  <ul class="nav-links">
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#drugs-section">Drug Atlas</a></li>
+    <li><a href="#credits">Credits</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-ring"></div>
+  <div class="hero-ring"></div>
+  <div class="hero-ring"></div>
+
+  <div class="molecule-dot" style="--t:6s;--r:220px;background:var(--accent);"></div>
+  <div class="molecule-dot" style="--t:9s;--r:180px;background:var(--accent2);top:20%;"></div>
+  <div class="molecule-dot" style="--t:11s;--r:260px;background:var(--accent3);top:60%;"></div>
+  <div class="molecule-dot" style="--t:7s;--r:150px;background:var(--warn);top:40%;"></div>
+
+  <div class="hero-badge">⬡ Pharmaceutical Reference Atlas</div>
+  <h1>PHARMACOSMOS</h1>
+  <p class="hero-sub">Drug Intelligence Database</p>
+  <p class="hero-desc">An authoritative 3D reference of 50+ commonly used drugs — their properties, molecular structures, pharmacological actions, dosage forms, and posology.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Drugs</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Data Points</div></div>
+  </div>
+  <a class="cta-btn" href="#categories">↓ Explore Atlas</a>
+</section>
+
+<!-- CATEGORIES -->
+<section id="categories">
+  <div class="section-header">
+    <div class="section-tag">// Classification Matrix</div>
+    <div class="section-title">Drug Categories</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="cat-grid" id="cat-grid"></div>
+</section>
+
+<!-- SEARCH -->
+<div id="search-section">
+  <div class="search-bar">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search-input" placeholder="Search drug name, class, or use…">
+  </div>
+</div>
+
+<!-- DRUG GRID -->
+<section>
+  <div id="results-count"></div>
+  <div id="drugs-section">
+    <div class="drugs-grid" id="drugs-grid"></div>
+    <div id="no-results">⚠ No drugs match your query.</div>
+  </div>
+</section>
+
+<!-- CREDITS -->
+<section id="credits">
+  <div class="credits-bg"></div>
+  <div class="credits-inner">
+    <div class="credits-dna">⬡</div>
+    <div class="credits-title">// Designed & Curated By</div>
+    <div class="credits-name">Ricky D.</div>
+    <div class="credits-role">B.Pharm Scholar · Pharmaceutical Sciences</div>
+    <div class="credits-divider"></div>
+    <div class="credits-copy">
+      PharmaCosmos was conceived as an <span>interactive pharmaceutical atlas</span><br>
+      bridging academic rigor with intuitive visual design.<br><br>
+      All drug data reflects standard <span>pharmacological references</span><br>
+      for educational and academic purposes.
+    </div>
+    <div class="credits-badge">
+      ⬡ © 2025 Ricky D. · PharmaCosmos · All Rights Reserved
+    </div>
+  </div>
+</section>
+
+<script>
+// ──────────────────────────────────────────────
+// DRUG DATABASE
+// ──────────────────────────────────────────────
+const DRUGS = [
+  // ANALGESICS / ANTIPYRETICS
+  {
+    id:1, icon:"💊", name:"Paracetamol", class:"Analgesic / Antipyretic", category:"Analgesics",
+    formula:"C₈H₉NO₂", mw:"151.16 g/mol",
+    properties:"White crystalline powder; slightly soluble in water; mp 168–172°C; pKa 9.5",
+    structure:"Para-aminophenol derivative; N-(4-hydroxyphenyl)acetamide",
+    uses:"Mild-to-moderate pain, fever, headache, arthralgia, post-operative pain",
+    dosageForm:"Tablets (500mg, 1g), Syrup (120mg/5mL, 250mg/5mL), Suppositories, IV infusion (10mg/mL)",
+    posology:"Adults: 500mg–1g every 4–6h; max 4g/day. Children: 10–15mg/kg every 4–6h"
+  },
+  {
+    id:2, icon:"🔴", name:"Aspirin", class:"NSAID / Antiplatelet", category:"Analgesics",
+    formula:"C₉H₈O₄", mw:"180.16 g/mol",
+    properties:"White crystalline; slight acetic odour; sparingly soluble in water; mp 136°C; pKa 3.5",
+    structure:"Acetylsalicylic acid — acetylated salicylate; irreversibly inhibits COX-1/COX-2",
+    uses:"Pain, fever, inflammation, cardiovascular prophylaxis (antiplatelet), Kawasaki disease",
+    dosageForm:"Tablets (75mg, 300mg, 500mg), Dispersible tablets, Enteric-coated tablets",
+    posology:"Analgesia: 300–900mg every 4–6h; max 4g/day. Antiplatelet: 75–100mg once daily"
+  },
+  {
+    id:3, icon:"🟠", name:"Ibuprofen", class:"NSAID", category:"Analgesics",
+    formula:"C₁₃H₁₈O₂", mw:"206.28 g/mol",
+    properties:"White crystalline; slightly soluble in water; mp 75–78°C; pKa 4.4",
+    structure:"Propionic acid derivative; 2-(4-isobutylphenyl)propanoic acid; reversible COX inhibitor",
+    uses:"Pain, fever, dysmenorrhoea, arthritis, dental pain, soft tissue injuries",
+    dosageForm:"Tablets (200mg, 400mg, 600mg), Suspension (100mg/5mL), Capsules, Gel (5%)",
+    posology:"Adults: 200–400mg every 4–6h; max 2.4g/day. Children: 5–10mg/kg every 6–8h"
+  },
+  {
+    id:4, icon:"💉", name:"Morphine", class:"Opioid Analgesic", category:"Analgesics",
+    formula:"C₁₇H₁₉NO₃", mw:"285.34 g/mol",
+    properties:"White crystalline; soluble in water; bitter taste; pKa 8.0 & 9.9",
+    structure:"Phenanthrene alkaloid; μ-opioid receptor agonist; contains two hydroxyl groups",
+    uses:"Severe pain (cancer, myocardial infarction, post-op), acute pulmonary oedema",
+    dosageForm:"Tablets (10mg, 30mg), Oral solution (10mg/5mL), Injection (10mg/mL, 15mg/mL), Modified-release tablets",
+    posology:"Adults oral: 5–20mg every 4h. IV: 2.5–10mg titrated to effect. CR tablets every 12h"
+  },
+  {
+    id:5, icon:"🔵", name:"Diclofenac", class:"NSAID", category:"Analgesics",
+    formula:"C₁₄H₁₁Cl₂NO₂", mw:"296.15 g/mol",
+    properties:"White to slightly yellowish crystalline; practically insoluble in water; pKa 4.0",
+    structure:"Phenylacetic acid derivative; 2-[(2,6-dichlorophenyl)amino]benzeneacetic acid",
+    uses:"Rheumatoid arthritis, osteoarthritis, ankylosing spondylitis, acute gout, dysmenorrhoea",
+    dosageForm:"Tablets (25mg, 50mg, 75mg), IM injection (75mg/3mL), Gel (1%), Eye drops (0.1%), Suppositories",
+    posology:"Adults: 75–150mg/day in divided doses. IM: 75mg once or twice daily"
+  },
+  // ANTIBIOTICS
+  {
+    id:6, icon:"🟢", name:"Amoxicillin", class:"Beta-lactam Antibiotic", category:"Antibiotics",
+    formula:"C₁₆H₁₉N₃O₅S", mw:"365.40 g/mol",
+    properties:"White to off-white crystalline; freely soluble in water; amphoteric; pKa 2.4, 7.4, 9.6",
+    structure:"Aminopenicillin; 4-hydroxy analogue of ampicillin; inhibits bacterial cell wall synthesis (PBP binding)",
+    uses:"Respiratory tract infections, UTI, otitis media, H. pylori (triple therapy), Lyme disease",
+    dosageForm:"Capsules (250mg, 500mg), Dispersible tablets (125mg, 250mg), Oral suspension (125mg/5mL, 250mg/5mL), IV injection",
+    posology:"Adults: 250–500mg every 8h or 500mg–1g every 12h. Severe: 1g every 8h"
+  },
+  {
+    id:7, icon:"🔷", name:"Ciprofloxacin", class:"Fluoroquinolone Antibiotic", category:"Antibiotics",
+    formula:"C₁₇H₁₈FN₃O₃", mw:"331.35 g/mol",
+    properties:"Light yellow crystalline; slightly soluble in water; pKa 6.0 & 8.8; photosensitive",
+    structure:"Fluoroquinolone; inhibits DNA gyrase (topoisomerase II) and topoisomerase IV",
+    uses:"UTI, respiratory infections, GI infections, gonorrhoea, anthrax prophylaxis",
+    dosageForm:"Tablets (250mg, 500mg, 750mg), IV infusion (2mg/mL), Eye drops (0.3%), Ear drops",
+    posology:"Adults oral: 250–750mg twice daily. IV: 200–400mg every 8–12h"
+  },
+  {
+    id:8, icon:"🟡", name:"Azithromycin", class:"Macrolide Antibiotic", category:"Antibiotics",
+    formula:"C₃₈H₇₂N₂O₁₂", mw:"748.98 g/mol",
+    properties:"White crystalline; poorly soluble in water; basic pKa 8.74; long half-life ~68h",
+    structure:"15-membered azalide macrolide; derived from erythromycin; binds 50S ribosomal subunit",
+    uses:"Community-acquired pneumonia, chlamydia, pharyngitis, sinusitis, traveller's diarrhoea",
+    dosageForm:"Tablets (250mg, 500mg), Oral suspension (200mg/5mL), IV infusion (500mg)",
+    posology:"500mg day 1, then 250mg daily for 4 days. STI single dose: 1g. Z-pack commonly prescribed"
+  },
+  {
+    id:9, icon:"⬤", name:"Metronidazole", class:"Nitroimidazole Antibiotic", category:"Antibiotics",
+    formula:"C₆H₉N₃O₃", mw:"171.15 g/mol",
+    properties:"White to pale-yellow crystalline; sparingly soluble in water; pKa 2.5; light-sensitive",
+    structure:"5-nitroimidazole; reduced to toxic nitroso radical in anaerobic organisms → DNA damage",
+    uses:"Anaerobic infections, H. pylori, trichomoniasis, bacterial vaginosis, C. difficile, amoebiasis",
+    dosageForm:"Tablets (200mg, 400mg), IV infusion (5mg/mL), Vaginal gel (0.75%), Topical gel, Suppositories",
+    posology:"400–500mg every 8h orally. IV: 500mg every 8h. Trichomoniasis: 2g single dose"
+  },
+  {
+    id:10, icon:"🟣", name:"Doxycycline", class:"Tetracycline Antibiotic", category:"Antibiotics",
+    formula:"C₂₂H₂₄N₂O₈", mw:"444.43 g/mol",
+    properties:"Yellow crystalline; slightly soluble in water; pKa 3.4, 7.7, 9.7; chelates divalent cations",
+    structure:"Semi-synthetic tetracycline; inhibits 30S ribosomal subunit → protein synthesis inhibition",
+    uses:"Malaria prophylaxis, chlamydia, Lyme disease, acne, atypical pneumonia, cholera",
+    dosageForm:"Capsules (50mg, 100mg), Tablets, IV injection, Topical gel",
+    posology:"100mg twice daily on day 1, then 100mg once daily. Malaria prophylaxis: 100mg daily"
+  },
+  // CARDIOVASCULAR
+  {
+    id:11, icon:"❤️", name:"Atenolol", class:"Beta-blocker (β₁-selective)", category:"Cardiovascular",
+    formula:"C₁₄H₂₂N₂O₃", mw:"266.34 g/mol",
+    properties:"White crystalline; soluble in water; pKa 9.6; hydrophilic — low CNS penetration",
+    structure:"Cardioselective β₁-adrenoceptor antagonist; aryloxyaminopropanol scaffold",
+    uses:"Hypertension, angina, arrhythmias, post-MI, heart failure (with caution)",
+    dosageForm:"Tablets (25mg, 50mg, 100mg), IV injection (0.5mg/mL)",
+    posology:"Hypertension: 25–50mg once daily; max 100mg/day. IV: 5mg over 5 min"
+  },
+  {
+    id:12, icon:"💓", name:"Amlodipine", class:"Calcium Channel Blocker", category:"Cardiovascular",
+    formula:"C₂₀H₂₅ClN₂O₅", mw:"408.88 g/mol",
+    properties:"White crystalline; slightly soluble in water; pKa 8.6; long half-life ~35–50h",
+    structure:"Dihydropyridine CCB; blocks L-type calcium channels in vascular smooth muscle",
+    uses:"Hypertension, stable angina, vasospastic angina, coronary artery disease",
+    dosageForm:"Tablets (2.5mg, 5mg, 10mg)",
+    posology:"Initial: 5mg once daily; may increase to 10mg. Elderly/hepatic impairment: 2.5mg"
+  },
+  {
+    id:13, icon:"💗", name:"Atorvastatin", class:"HMG-CoA Reductase Inhibitor (Statin)", category:"Cardiovascular",
+    formula:"C₃₃H₃₅FN₂O₅", mw:"558.64 g/mol",
+    properties:"White to off-white crystalline; insoluble in aqueous solution; pKa 4.46 & 1.97",
+    structure:"Synthetic statin; inhibits HMG-CoA reductase → ↓ hepatic cholesterol synthesis",
+    uses:"Hypercholesterolaemia, dyslipidaemia, cardiovascular risk reduction, prevention of CVD events",
+    dosageForm:"Tablets (10mg, 20mg, 40mg, 80mg)",
+    posology:"10–80mg once daily (usually at night). Titrate based on LDL targets. Max 80mg/day"
+  },
+  {
+    id:14, icon:"🩺", name:"Ramipril", class:"ACE Inhibitor", category:"Cardiovascular",
+    formula:"C₂₃H₃₂N₂O₅", mw:"416.51 g/mol",
+    properties:"White crystalline; slightly soluble in water; prodrug — converted to ramiprilat",
+    structure:"Bicyclic proline derivative; prodrug hydrolysed to active ramiprilat; inhibits ACE → ↓ angiotensin II",
+    uses:"Hypertension, heart failure, post-MI, diabetic nephropathy, stroke prevention",
+    dosageForm:"Capsules/Tablets (1.25mg, 2.5mg, 5mg, 10mg), Oral solution",
+    posology:"Hypertension: 1.25–5mg once daily; max 10mg/day. Heart failure: 1.25mg twice daily up to 5mg twice daily"
+  },
+  {
+    id:15, icon:"💟", name:"Furosemide", class:"Loop Diuretic", category:"Cardiovascular",
+    formula:"C₁₂H₁₁ClN₂O₅S", mw:"330.74 g/mol",
+    properties:"White to slightly yellow crystalline; sparingly soluble in water; pKa 3.9; photosensitive",
+    structure:"Sulfonamide derivative; inhibits Na⁺/K⁺/2Cl⁻ cotransporter in thick ascending loop of Henle",
+    uses:"Oedema (cardiac, renal, hepatic), hypertension, acute pulmonary oedema, hypercalcaemia",
+    dosageForm:"Tablets (20mg, 40mg, 80mg), Oral solution (40mg/5mL), IV/IM injection (10mg/mL)",
+    posology:"Adults oral: 20–80mg once daily. IV: 20–40mg slowly. Severe oedema: up to 600mg/day"
+  },
+  // RESPIRATORY
+  {
+    id:16, icon:"🫁", name:"Salbutamol", class:"β₂-Adrenoceptor Agonist (SABA)", category:"Respiratory",
+    formula:"C₁₃H₂₁NO₃", mw:"239.31 g/mol",
+    properties:"White crystalline; soluble in water; pKa 9.3 (amino group); racemic mixture",
+    structure:"Phenethylamine derivative; selectively activates β₂-adrenoceptors → bronchodilation",
+    uses:"Acute bronchospasm (asthma, COPD), exercise-induced asthma, hyperkalemia (IV)",
+    dosageForm:"MDI inhaler (100μg/actuation), Nebuliser solution (2.5mg/2.5mL), Tablets (2mg, 4mg), IV",
+    posology:"Inhaler: 100–200μg up to 4x daily. Acute attack: 2.5–5mg nebulised. Oral: 2–4mg 3–4x daily"
+  },
+  {
+    id:17, icon:"🌬️", name:"Beclometasone", class:"Inhaled Corticosteroid", category:"Respiratory",
+    formula:"C₂₈H₃₇ClO₇", mw:"521.04 g/mol",
+    properties:"White to creamy-white crystalline; insoluble in water; high lipophilicity",
+    structure:"Halogenated glucocorticoid ester; activated by esterases to beclometasone-17-monopropionate",
+    uses:"Prophylaxis of asthma, rhinitis (nasal spray), COPD (severe)",
+    dosageForm:"MDI inhaler (50, 100, 200, 250μg/actuation), Nasal spray, Spacer-compatible inhalers",
+    posology:"Asthma: 200–400μg twice daily (low dose); up to 800–1000μg/day (high dose). Rhinitis: 50–100μg/nostril/day"
+  },
+  {
+    id:18, icon:"💨", name:"Montelukast", class:"Leukotriene Receptor Antagonist", category:"Respiratory",
+    formula:"C₃₅H₃₆ClNO₃S", mw:"586.13 g/mol",
+    properties:"White to off-white amorphous powder; freely soluble in ethanol; pKa ~2.7; hygroscopic",
+    structure:"Selective CysLT₁ antagonist; blocks leukotriene D4 on airway smooth muscle",
+    uses:"Prophylaxis of asthma, allergic rhinitis, exercise-induced bronchospasm",
+    dosageForm:"Film-coated tablets (10mg), Chewable tablets (4mg, 5mg), Granules (4mg/sachet)",
+    posology:"Adults: 10mg once daily in evening. Children 6–14 yr: 5mg; 2–5 yr: 4mg"
+  },
+  // GI
+  {
+    id:19, icon:"🟤", name:"Omeprazole", class:"Proton Pump Inhibitor", category:"Gastrointestinal",
+    formula:"C₁₇H₁₉N₃O₃S", mw:"345.42 g/mol",
+    properties:"White crystalline; slightly soluble in water; pKa 4.0 & 8.8; acid-labile — requires enteric coating",
+    structure:"Benzimidazole sulfoxide; irreversibly inhibits H⁺/K⁺-ATPase (proton pump) in parietal cells",
+    uses:"GERD, peptic ulcer disease, H. pylori eradication, Zollinger-Ellison syndrome, NSAID-induced ulcers",
+    dosageForm:"Enteric-coated capsules (10mg, 20mg, 40mg), IV injection, MUPS tablets",
+    posology:"GERD: 20–40mg once daily. Duodenal ulcer: 20mg once daily for 4 weeks. H. pylori: 20mg twice daily"
+  },
+  {
+    id:20, icon:"🫙", name:"Ondansetron", class:"5-HT₃ Antagonist (Antiemetic)", category:"Gastrointestinal",
+    formula:"C₁₈H₁₉N₃O", mw:"293.37 g/mol",
+    properties:"White to off-white crystalline; soluble in water; pKa 7.4; stable at room temperature",
+    structure:"Carbazolone derivative; selective 5-HT₃ antagonist; blocks vagal afferents & CTZ",
+    uses:"Prevention of CINV (chemo/radiotherapy-induced), post-operative nausea/vomiting",
+    dosageForm:"Tablets (4mg, 8mg), Orally disintegrating tablets, IV/IM injection (2mg/mL), Syrup",
+    posology:"CINV: 8mg before chemo then 8mg at 4–8h. Post-op: 4mg IV/IM. Max 32mg/day IV"
+  },
+  {
+    id:21, icon:"🍵", name:"Metoclopramide", class:"Dopamine Antagonist / Prokinetic", category:"Gastrointestinal",
+    formula:"C₁₄H₂₂ClN₃O₂", mw:"299.80 g/mol",
+    properties:"White crystalline; freely soluble in water; pKa 0.6 & 9.3; crosses blood-brain barrier",
+    structure:"Substituted benzamide; blocks D₂ receptors in CTZ and GI tract; also partial 5-HT₃ antagonist",
+    uses:"Nausea, vomiting, gastroparesis, GERD, gastric emptying disorders",
+    dosageForm:"Tablets (10mg), Oral solution (5mg/5mL), IV/IM injection (5mg/2mL, 10mg/2mL)",
+    posology:"10mg three times daily before meals (30 min). Max 5 days to avoid tardive dyskinesia"
+  },
+  {
+    id:22, icon:"💧", name:"Lactulose", class:"Osmotic Laxative", category:"Gastrointestinal",
+    formula:"C₁₂H₂₂O₁₁", mw:"342.30 g/mol",
+    properties:"Clear, viscous, amber liquid; very soluble in water; sweet taste; disaccharide",
+    structure:"Synthetic disaccharide (galactose + fructose); not absorbed from GI tract; fermented by colonic bacteria",
+    uses:"Constipation, hepatic encephalopathy (reduces ammonia absorption)",
+    dosageForm:"Oral solution (3.3g/5mL), Enema",
+    posology:"Constipation: 15–45mL once or twice daily. Hepatic encephalopathy: 30–50mL three times daily"
+  },
+  // CNS
+  {
+    id:23, icon:"🧠", name:"Diazepam", class:"Benzodiazepine", category:"CNS",
+    formula:"C₁₆H₁₃ClN₂O", mw:"284.74 g/mol",
+    properties:"Off-white crystalline; practically insoluble in water; lipophilic; pKa 3.4",
+    structure:"1,4-benzodiazepine; potentiates GABA at GABA-A receptors → ↑ Cl⁻ conductance",
+    uses:"Anxiety, alcohol withdrawal, muscle spasm, status epilepticus, pre-medication, sedation",
+    dosageForm:"Tablets (2mg, 5mg, 10mg), IV/IM injection (5mg/mL), Rectal solution, Oral solution",
+    posology:"Anxiety: 2–10mg 2–4x/day. Status epilepticus IV: 10–20mg at 5mg/min. Muscle spasm: 5–15mg/day"
+  },
+  {
+    id:24, icon:"⚡", name:"Phenytoin", class:"Antiepileptic (Hydantoin)", category:"CNS",
+    formula:"C₁₅H₁₂N₂O₂", mw:"252.27 g/mol",
+    properties:"White crystalline; sparingly soluble in water; narrow therapeutic index; pKa 8.3",
+    structure:"Diphenylhydantoin; blocks voltage-gated Na⁺ channels in neuronal membranes",
+    uses:"Tonic-clonic seizures, partial seizures, status epilepticus, trigeminal neuralgia, arrhythmias",
+    dosageForm:"Capsules (25mg, 50mg, 100mg), Tablets (chewable 50mg), IV injection, Oral suspension",
+    posology:"Loading: 15–20mg/kg IV at ≤50mg/min. Maintenance: 4–7mg/kg/day. Therapeutic level: 10–20μg/mL"
+  },
+  {
+    id:25, icon:"😴", name:"Sertraline", class:"SSRI Antidepressant", category:"CNS",
+    formula:"C₁₇H₁₇Cl₂N", mw:"306.23 g/mol",
+    properties:"Off-white crystalline; slightly soluble in water; pKa 9.47; high protein binding (98%)",
+    structure:"Naphthalenamine derivative; selective serotonin reuptake inhibitor; ↑ synaptic 5-HT",
+    uses:"Major depression, OCD, panic disorder, PTSD, PMDD, social anxiety disorder",
+    dosageForm:"Film-coated tablets (25mg, 50mg, 100mg), Oral concentrate (20mg/mL)",
+    posology:"Start 25–50mg once daily; titrate over weeks to 50–200mg/day. Full effect in 4–6 weeks"
+  },
+  {
+    id:26, icon:"🌙", name:"Haloperidol", class:"Typical Antipsychotic (Butyrophenone)", category:"CNS",
+    formula:"C₂₁H₂₃ClFNO₂", mw:"375.87 g/mol",
+    properties:"White to slightly yellow crystalline; insoluble in water; pKa 8.3; high lipophilicity",
+    structure:"Butyrophenone; potent D₂ antagonist; reduces positive symptoms of psychosis",
+    uses:"Schizophrenia, mania, severe agitation, Tourette syndrome, delirium, chemotherapy-induced nausea",
+    dosageForm:"Tablets (0.5mg, 1.5mg, 5mg, 10mg, 20mg), Oral liquid, IM injection, Depot injection (decanoate)",
+    posology:"Psychosis: 0.5–5mg 2–3x/day orally. Acute agitation IM: 5–10mg. Depot: 50–200mg every 4 weeks"
+  },
+  // ENDOCRINE
+  {
+    id:27, icon:"🩸", name:"Metformin", class:"Biguanide Antidiabetic", category:"Endocrine",
+    formula:"C₄H₁₁N₅", mw:"129.16 g/mol",
+    properties:"White crystalline; freely soluble in water; pKa 11.5 & 12.4; renal elimination",
+    structure:"Dimethylbiguanide; activates AMPK → ↓ hepatic gluconeogenesis; improves insulin sensitivity",
+    uses:"Type 2 diabetes mellitus (first-line), polycystic ovary syndrome, metabolic syndrome",
+    dosageForm:"Tablets (500mg, 850mg, 1000mg), Modified-release tablets, Oral solution",
+    posology:"Start 500mg twice daily with meals; increase over 4 weeks to 1000mg twice daily. Max 3g/day"
+  },
+  {
+    id:28, icon:"🩹", name:"Insulin (Human)", class:"Antidiabetic (Hormone)", category:"Endocrine",
+    formula:"C₂₅₇H₃₈₃N₆₅O₇₇S₆", mw:"~5808 g/mol",
+    properties:"Polypeptide (51 amino acids); 2 chains linked by disulfide bonds; stored refrigerated",
+    structure:"Hexameric zinc complex in pharmaceutical form; monomers/dimers are active; binds insulin receptor",
+    uses:"Type 1 diabetes, Type 2 diabetes (inadequately controlled), diabetic ketoacidosis, hyperkalemia",
+    dosageForm:"Solution for injection (100 IU/mL); insulin pen, vial, pump cartridges",
+    posology:"Highly individualised. Type 1: basal-bolus ~0.5–1 IU/kg/day. Type 2: start 0.1–0.2 IU/kg/day basal"
+  },
+  {
+    id:29, icon:"🦋", name:"Levothyroxine", class:"Thyroid Hormone (T₄)", category:"Endocrine",
+    formula:"C₁₅H₁₁I₄NO₄", mw:"776.87 g/mol",
+    properties:"White to light yellow crystalline; sparingly soluble in water; contains 4 iodine atoms",
+    structure:"Synthetic thyroxine (T4); deiodinated in periphery to active triiodothyronine (T3)",
+    uses:"Hypothyroidism, myxoedema, thyroid cancer suppression, congenital hypothyroidism",
+    dosageForm:"Tablets (25μg, 50μg, 75μg, 100μg, 125μg, 150μg, 200μg), IV injection",
+    posology:"Adults: start 25–50μg once daily; increase by 25–50μg every 4 weeks. Target TSH 0.5–2.5 mIU/L"
+  },
+  {
+    id:30, icon:"🌿", name:"Prednisolone", class:"Corticosteroid", category:"Endocrine",
+    formula:"C₂₁H₂₈O₅", mw:"360.44 g/mol",
+    properties:"White to slightly yellow crystalline; sparingly soluble in water; anti-inflammatory & immunosuppressive",
+    structure:"Synthetic glucocorticoid; binds GR → ↓ NF-κB, ↓ cytokines, ↑ anti-inflammatory proteins",
+    uses:"Allergies, asthma, autoimmune diseases, rheumatoid arthritis, nephrotic syndrome, transplant",
+    dosageForm:"Tablets (1mg, 2.5mg, 5mg, 10mg, 25mg), Oral solution, Eye/ear drops, Injection",
+    posology:"Anti-inflammatory: 5–60mg/day. Severe disease: up to 1–2mg/kg/day. Taper gradually"
+  },
+  // ANTIPARASITIC / ANTIMALARIAL
+  {
+    id:31, icon:"🌡️", name:"Chloroquine", class:"Antimalarial / DMARD", category:"Antiparasitic",
+    formula:"C₁₈H₂₆ClN₃", mw:"319.87 g/mol",
+    properties:"White crystalline; freely soluble in water; pKa 8.1 & 10.2; basic drug",
+    structure:"4-aminoquinoline; accumulates in parasite food vacuole; prevents haem detoxification",
+    uses:"Malaria (P. vivax, P. ovale, P. malariae), rheumatoid arthritis, lupus (hydroxychloroquine analog)",
+    dosageForm:"Tablets (150mg base, 250mg salt), Syrup (50mg base/5mL), Injection",
+    posology:"Malaria treatment: 600mg base then 300mg at 6h, 24h, 48h. Prophylaxis: 300mg weekly"
+  },
+  {
+    id:32, icon:"🔬", name:"Albendazole", class:"Anthelmintic (Benzimidazole)", category:"Antiparasitic",
+    formula:"C₁₂H₁₅N₃O₂S", mw:"265.33 g/mol",
+    properties:"White to off-white crystalline; poorly soluble in water; better absorbed with fatty meal",
+    structure:"Benzimidazole carbamate; inhibits tubulin polymerisation → microtubule disruption in helminths",
+    uses:"Roundworm, hookworm, tapeworm, giardiasis, neurocysticercosis, hydatid disease",
+    dosageForm:"Tablets (200mg, 400mg), Chewable tablets, Oral suspension (100mg/5mL)",
+    posology:"Single-dose infections: 400mg single dose. Neurocysticercosis: 15mg/kg/day × 28 days. Hydatid: 400mg BD"
+  },
+  // DERMATOLOGY / MISC
+  {
+    id:33, icon:"🧴", name:"Hydrocortisone", class:"Topical Corticosteroid", category:"Dermatology",
+    formula:"C₂₁H₃₀O₅", mw:"362.46 g/mol",
+    properties:"White crystalline; slightly soluble in water; weakest potency class I topical steroid",
+    structure:"Endogenous glucocorticoid (cortisol); binds GR → anti-inflammatory transcription regulation",
+    uses:"Eczema, dermatitis, insect bites, mild psoriasis, nappy rash; IV for adrenal crisis",
+    dosageForm:"Cream/ointment (0.5%, 1%, 2.5%), Injection (100mg, 250mg), Tablets (5mg, 10mg, 20mg)",
+    posology:"Topical: apply thinly once or twice daily. IV adrenal crisis: 100mg bolus, then 200mg/24h infusion"
+  },
+  {
+    id:34, icon:"💊", name:"Cetirizine", class:"2nd-Generation Antihistamine", category:"Dermatology",
+    formula:"C₂₁H₂₅ClN₂O₃", mw:"388.89 g/mol",
+    properties:"White crystalline; freely soluble in water; zwitterionic pKa 2.2 & 7.4; low sedation",
+    structure:"Piperazine derivative; metabolite of hydroxyzine; selective H₁ antagonist, minimal CNS penetration",
+    uses:"Allergic rhinitis, urticaria, hay fever, atopic dermatitis, angioedema, chronic idiopathic urticaria",
+    dosageForm:"Tablets (10mg), Oral drops (10mg/mL), Syrup (5mg/5mL)",
+    posology:"Adults: 10mg once daily. Children 6–12 yr: 5mg twice daily. 2–6 yr: 2.5mg twice daily"
+  },
+  {
+    id:35, icon:"🧪", name:"Clotrimazole", class:"Azole Antifungal", category:"Dermatology",
+    formula:"C₂₂H₁₇ClN₂", mw:"344.84 g/mol",
+    properties:"White crystalline; slightly soluble in water; broad-spectrum antifungal activity",
+    structure:"Imidazole derivative; inhibits lanosterol 14α-demethylase → ↓ ergosterol synthesis → fungal membrane disruption",
+    uses:"Candidiasis (oral, vaginal, skin), tinea pedis/cruris/corporis, pityriasis versicolor",
+    dosageForm:"Cream/solution (1%), Vaginal cream/pessaries (1%, 500mg), Lozenges (10mg)",
+    posology:"Topical: apply twice daily for 2–4 weeks. Vaginal: 500mg single pessary or 200mg/day × 3 days"
+  },
+  {
+    id:36, icon:"🔺", name:"Warfarin", class:"Vitamin K Antagonist (Anticoagulant)", category:"Cardiovascular",
+    formula:"C₁₉H₁₆O₄", mw:"308.33 g/mol",
+    properties:"White crystalline; soluble in water; pKa 4.9; S-enantiomer 3–5× more potent; narrow TI",
+    structure:"Coumarin derivative; inhibits VKOR enzyme → ↓ activation of factors II, VII, IX, X, protein C & S",
+    uses:"AF (stroke prevention), DVT/PE treatment and prophylaxis, prosthetic heart valves",
+    dosageForm:"Tablets (0.5mg, 1mg, 3mg, 5mg)",
+    posology:"Highly individualised; adjust based on INR. Target INR 2–3 (most indications). Initial ~5–10mg/day"
+  },
+  {
+    id:37, icon:"💠", name:"Heparin", class:"Anticoagulant (Glycosaminoglycan)", category:"Cardiovascular",
+    formula:"Polysaccharide mixture", mw:"3,000–30,000 Da",
+    properties:"Mixture of sulfated polysaccharide chains; highly negatively charged; water-soluble",
+    structure:"Binds antithrombin III → ↑ 1000x inactivation of thrombin (IIa) and factor Xa",
+    uses:"DVT/PE treatment, ACS, dialysis anticoagulation, post-surgical prophylaxis, DIC",
+    dosageForm:"IV injection/infusion (1000 IU/mL, 5000 IU/mL), SC injection (low-molecular-weight forms)",
+    posology:"Prophylaxis SC: 5000 IU every 8–12h. Therapeutic IV: 80 IU/kg bolus then 18 IU/kg/h infusion"
+  },
+  {
+    id:38, icon:"🟥", name:"Digoxin", class:"Cardiac Glycoside", category:"Cardiovascular",
+    formula:"C₄₁H₆₄O₁₄", mw:"780.94 g/mol",
+    properties:"White crystalline; slightly soluble in water; narrow therapeutic index; pKa 7.15",
+    structure:"Steroid glycoside; inhibits Na⁺/K⁺-ATPase → ↑ intracellular Na⁺/Ca²⁺ → positive inotropy",
+    uses:"Heart failure (reduced EF), atrial fibrillation, atrial flutter (rate control)",
+    dosageForm:"Tablets (62.5μg, 125μg, 250μg), Oral solution (50μg/mL), IV injection (250μg/mL)",
+    posology:"Loading (optional): 500–750μg over 24h. Maintenance: 62.5–250μg/day. Therapeutic level: 0.5–2 ng/mL"
+  },
+  // ANTIMICROBIALS CONTINUED
+  {
+    id:39, icon:"🔶", name:"Co-amoxiclav", class:"Penicillin + β-Lactamase Inhibitor", category:"Antibiotics",
+    formula:"Amoxicillin + Clavulanic acid",
+    properties:"Combination; clavulanic acid is suicide inhibitor of β-lactamase enzymes",
+    structure:"Amoxicillin (aminopenicillin) + clavulanate (β-lactam ring, 6-amino-penicillanate structure); broad-spectrum",
+    uses:"Respiratory, dental, urinary, skin infections resistant to amoxicillin; animal bites",
+    dosageForm:"Tablets (375mg, 625mg, 1g), Suspension (125/31mg per 5mL), IV injection",
+    posology:"Adults: 375–625mg (250/125–500/125mg) three times daily. Severe: 1g every 8h IV"
+  },
+  {
+    id:40, icon:"🟦", name:"Fluconazole", class:"Azole Antifungal (Systemic)", category:"Dermatology",
+    formula:"C₁₃H₁₂F₂N₆O", mw:"306.27 g/mol",
+    properties:"White crystalline; soluble in water; pKa 1.76 & 2.95; excellent oral bioavailability (~90%)",
+    structure:"Bis-triazole; inhibits cytochrome P450 (CYP51) → lanosterol demethylase → ↓ ergosterol",
+    uses:"Vaginal/systemic candidiasis, cryptococcal meningitis, tinea infections, prophylaxis in immunocompromised",
+    dosageForm:"Capsules (50mg, 150mg, 200mg), Oral suspension (50mg/5mL), IV infusion (2mg/mL)",
+    posology:"Vaginal candidiasis: 150mg single dose. Systemic: 200–400mg/day. Meningitis: 400–800mg/day"
+  },
+  // ANALGESICS / OTHERS
+  {
+    id:41, icon:"🟪", name:"Tramadol", class:"Opioid Analgesic (Weak)", category:"Analgesics",
+    formula:"C₁₆H₂₅NO₂", mw:"263.38 g/mol",
+    properties:"White crystalline; freely soluble in water; pKa 9.4; racemic mixture",
+    structure:"Cyclohexanol derivative; dual mechanism: μ-opioid receptor agonist + serotonin/noradrenaline reuptake inhibition",
+    uses:"Moderate to moderately severe pain, neuropathic pain, cancer pain",
+    dosageForm:"Capsules (50mg, 100mg), Modified-release tablets (100mg, 150mg, 200mg), IV/IM injection",
+    posology:"50–100mg every 4–6h; max 400mg/day. Modified-release: 100–200mg twice daily"
+  },
+  {
+    id:42, icon:"🩵", name:"Codeine", class:"Opioid Analgesic (Weak) / Antitussive", category:"Analgesics",
+    formula:"C₁₈H₂₁NO₃", mw:"299.36 g/mol",
+    properties:"White crystalline; sparingly soluble in water; prodrug; pKa 8.2 & 9.9; CYP2D6 substrate",
+    structure:"Methylmorphine; converted to morphine by CYP2D6; μ-opioid agonist; binds σ and κ receptors",
+    uses:"Mild-moderate pain, dry cough, diarrhoea (as codeine phosphate)",
+    dosageForm:"Tablets (15mg, 30mg, 60mg), Linctus (15mg/5mL), Combined preparations",
+    posology:"Pain: 30–60mg every 4h; max 240mg/day. Cough linctus: 5–10mL every 4–6h"
+  },
+  {
+    id:43, icon:"🌸", name:"Naproxen", class:"NSAID (Propionic Acid)", category:"Analgesics",
+    formula:"C₁₄H₁₄O₃", mw:"230.26 g/mol",
+    properties:"White to off-white crystalline; slightly soluble in water; pKa 4.2; long half-life ~12–17h",
+    structure:"(S)-enantiomer only; propionic acid derivative; non-selective COX-1/COX-2 inhibitor",
+    uses:"Musculoskeletal pain, dysmenorrhoea, gout, migraine, arthritis, soft tissue injuries",
+    dosageForm:"Tablets (250mg, 500mg), Enteric-coated tablets, Gel (10%), Oral suspension",
+    posology:"250–500mg twice daily; max 1.5g/day (short-term). Gout: 500mg initial then 250mg every 8h"
+  },
+  // CNS CONTINUED
+  {
+    id:44, icon:"💜", name:"Levodopa/Carbidopa", class:"Antiparkinsonian", category:"CNS",
+    formula:"L: C₉H₁₁NO₄ / C: C₁₀H₁₄N₂O₄", mw:"L: 197.19 / C: 226.23",
+    properties:"Levodopa: aromatic amino acid; carbidopa inhibits peripheral decarboxylation, ↑ CNS availability",
+    structure:"Levodopa = dopamine precursor; crosses BBB → converted to dopamine. Carbidopa blocks AADC peripherally",
+    uses:"Parkinson's disease (first-line), restless leg syndrome, parkinsonism",
+    dosageForm:"Combined tablets (25/100mg, 25/250mg), Modified-release tablets, Intestinal gel",
+    posology:"Start 12.5/50mg 2–3x/day; titrate slowly over weeks. Max ~8 tablets/day (25/250mg)"
+  },
+  {
+    id:45, icon:"🔮", name:"Lithium Carbonate", class:"Mood Stabiliser", category:"CNS",
+    formula:"Li₂CO₃", mw:"73.89 g/mol",
+    properties:"White granular crystalline; sparingly soluble in water; renal excretion; narrow TI",
+    structure:"Monovalent cation; modulates PKC, GSK-3β, inositol signalling; alters neurotransmitter cycling",
+    uses:"Bipolar disorder (manic and depressive episodes), mania prophylaxis, augmentation in depression",
+    dosageForm:"Tablets (200mg, 400mg as carbonate), Modified-release tablets, Capsules, Liquid",
+    posology:"Start 400mg 2–3x/day; adjust to maintain serum level 0.6–1.0 mmol/L. Monitor TFTs and renal function"
+  },
+  {
+    id:46, icon:"🟫", name:"Carbamazepine", class:"Antiepileptic / Mood Stabiliser", category:"CNS",
+    formula:"C₁₅H₁₂N₂O", mw:"236.27 g/mol",
+    properties:"White to off-white crystalline; practically insoluble in water; potent enzyme inducer (CYP3A4)",
+    structure:"Dibenzazepine; blocks voltage-gated Na⁺ channels; stabilises neuronal membranes",
+    uses:"Partial and tonic-clonic seizures, trigeminal neuralgia, bipolar disorder, diabetic neuropathy",
+    dosageForm:"Tablets (100mg, 200mg, 400mg), Modified-release tablets, Oral suspension, Suppositories",
+    posology:"Epilepsy: start 100–200mg once/twice daily; increase to 800–1200mg/day. TN: 200–800mg/day"
+  },
+  // ENDOCRINE / MISC
+  {
+    id:47, icon:"🩺", name:"Glibenclamide", class:"Sulfonylurea (Antidiabetic)", category:"Endocrine",
+    formula:"C₂₃H₂₈ClN₃O₅S", mw:"494.00 g/mol",
+    properties:"White crystalline; practically insoluble in water; pKa 5.3; highly protein-bound (99%)",
+    structure:"Second-generation sulfonylurea; stimulates pancreatic β-cell insulin release by blocking K-ATP channels",
+    uses:"Type 2 diabetes mellitus (when metformin alone insufficient), gestational diabetes",
+    dosageForm:"Tablets (2.5mg, 5mg)",
+    posology:"2.5–5mg once daily with breakfast; increase in steps to max 15–20mg/day. Take with food"
+  },
+  {
+    id:48, icon:"⭕", name:"Folic Acid", class:"Vitamin B₉ / Haematinic", category:"Endocrine",
+    formula:"C₁₉H₁₉N₇O₆", mw:"441.40 g/mol",
+    properties:"Yellow to orange crystalline; slightly soluble in water; heat and light labile; pKa 4.65 & 8.26",
+    structure:"Pteroylglutamic acid; converted to tetrahydrofolate (THF); essential for DNA/RNA synthesis and methylation",
+    uses:"Megaloblastic anaemia, neural tube defect prevention in pregnancy, methotrexate supplementation",
+    dosageForm:"Tablets (400μg, 1mg, 5mg), IV/IM injection",
+    posology:"NTD prevention: 400μg daily before and during early pregnancy. Deficiency: 5mg daily × 4 months"
+  },
+  {
+    id:49, icon:"🔴", name:"Ferrous Sulfate", class:"Iron Supplement / Haematinic", category:"Endocrine",
+    formula:"FeSO₄·7H₂O", mw:"278.01 g/mol (heptahydrate)",
+    properties:"Blue-green crystalline; soluble in water; oxidises in air; best absorbed in acidic environment",
+    structure:"Fe²⁺ salt; absorbed as Fe²⁺ in duodenum; transferred to tissues via transferrin; stored as ferritin",
+    uses:"Iron-deficiency anaemia, iron supplementation in pregnancy, chronic disease anaemia",
+    dosageForm:"Tablets (200mg = 65mg elemental iron), Modified-release capsules, Oral drops, Syrup",
+    posology:"Adults: 200mg 2–3x daily. Prophylaxis in pregnancy: 200mg once daily. Take on empty stomach"
+  },
+  {
+    id:50, icon:"💊", name:"Atenolol + Chlorthalidone", class:"Antihypertensive Combination", category:"Cardiovascular",
+    formula:"Combination", properties:"Fixed-dose combination of β-blocker and thiazide-like diuretic for synergistic BP reduction",
+    structure:"Atenolol: cardioselective β₁ blocker. Chlorthalidone: inhibits Na⁺/Cl⁻ cotransporter in DCT",
+    uses:"Hypertension (especially when monotherapy insufficient), can reduce cardiovascular events",
+    dosageForm:"Tablets (50/12.5mg, 100/25mg)",
+    posology:"One tablet daily in the morning. Dose titrated to BP response. Avoid abrupt withdrawal"
+  },
+  {
+    id:51, icon:"🌊", name:"Oral Rehydration Salts", class:"Electrolyte / Rehydration Therapy", category:"Gastrointestinal",
+    formula:"NaCl + KCl + Na Citrate + Glucose",
+    properties:"Powder; utilises glucose-coupled Na⁺ cotransport (SGLT1) to drive water absorption; WHO formula",
+    structure:"Glucose: 13.5g/L; NaCl: 2.6g/L; KCl: 1.5g/L; Na citrate: 2.9g/L; total osmolarity 245 mOsm/L",
+    uses:"Dehydration due to acute diarrhoea and vomiting (cholera, gastroenteritis, traveller's diarrhoea)",
+    dosageForm:"Oral powder sachets (dissolved in 200mL water)",
+    posology:"Adults: 200–400mL after each loose stool. Children: 50–100mL/kg over 4h for mild-moderate dehydration"
+  },
+  {
+    id:52, icon:"🟩", name:"Enalapril", class:"ACE Inhibitor", category:"Cardiovascular",
+    formula:"C₂₀H₂₈N₂O₅", mw:"376.45 g/mol",
+    properties:"White crystalline; sparingly soluble; prodrug enalaprilat is active; pKa 3.0 & 5.5",
+    structure:"Dipeptide ACE inhibitor prodrug; hydrolysed to enalaprilat which binds ACE active site",
+    uses:"Hypertension, heart failure, asymptomatic LV dysfunction, diabetic nephropathy",
+    dosageForm:"Tablets (2.5mg, 5mg, 10mg, 20mg), IV injection (enalaprilat 1.25mg/mL)",
+    posology:"Start 2.5–5mg once daily; usual 10–20mg/day; max 40mg/day. IV: 1.25mg over 5 min every 6h"
+  },
+  {
+    id:53, icon:"🔸", name:"Pantoprazole", class:"Proton Pump Inhibitor", category:"Gastrointestinal",
+    formula:"C₁₆H₁₅F₂N₃O₄S", mw:"383.37 g/mol",
+    properties:"White to off-white crystalline; soluble in water (as sodium salt); acid-labile — requires enteric coating",
+    structure:"Benzimidazole sulfoxide; irreversibly inhibits H⁺/K⁺-ATPase at final step of acid secretion",
+    uses:"GERD, peptic ulcer, NSAID-associated ulcer prevention, H. pylori eradication, Zollinger-Ellison",
+    dosageForm:"Enteric-coated tablets (20mg, 40mg), IV injection (40mg vial)",
+    posology:"GERD: 20–40mg once daily. IV (hospital): 40mg once daily. ZES: 40mg twice daily (may increase)"
+  },
+  {
+    id:54, icon:"🫀", name:"Clopidogrel", class:"Antiplatelet (P2Y₁₂ Inhibitor)", category:"Cardiovascular",
+    formula:"C₁₆H₁₆ClNO₂S", mw:"321.82 g/mol",
+    properties:"White crystalline; freely soluble in methanol; prodrug (CYP2C19 activation); pKa 4.55",
+    structure:"Thienopyridine; active metabolite irreversibly blocks P2Y₁₂ ADP receptor on platelets",
+    uses:"ACS, PCI (with aspirin), ischaemic stroke/TIA prevention, PAD, STEMI",
+    dosageForm:"Film-coated tablets (75mg, 300mg)",
+    posology:"Stable angina/stroke: 75mg once daily. ACS loading: 300–600mg then 75mg/day. With aspirin (DAPT)"
+  },
+  {
+    id:55, icon:"🌺", name:"Loratadine", class:"2nd-Generation Antihistamine", category:"Dermatology",
+    formula:"C₂₂H₂₃ClN₂O₂", mw:"382.88 g/mol",
+    properties:"White to off-white crystalline; practically insoluble in water; pKa 5.0; non-sedating",
+    structure:"Tricyclic antihistamine; selective peripheral H₁ receptor antagonist; zwitterionic at physiologic pH",
+    uses:"Allergic rhinitis, urticaria, hay fever, atopic dermatitis, chronic idiopathic urticaria",
+    dosageForm:"Tablets (10mg), Syrup (5mg/5mL), Dispersible tablets",
+    posology:"Adults and children >12: 10mg once daily. Children 2–12yr (<30kg): 5mg/day; (>30kg): 10mg/day"
+  },
+];
+
+// ──────────────────────────────────────────────
+// CATEGORIES
+// ──────────────────────────────────────────────
+const CATEGORIES = [
+  { id:"All", name:"All Drugs", icon:"⬡", color:"var(--accent)" },
+  { id:"Analgesics", name:"Analgesics", icon:"💊", color:"#ff6b35" },
+  { id:"Antibiotics", name:"Antibiotics", icon:"🦠", color:"#00ff9d" },
+  { id:"Cardiovascular", name:"Cardio-vascular", icon:"❤️", color:"#ff4477" },
+  { id:"Respiratory", name:"Respiratory", icon:"🫁", color:"#44aaff" },
+  { id:"CNS", name:"CNS / Neuro", icon:"🧠", color:"#b88fff" },
+  { id:"Gastrointestinal", name:"Gastro-Intestinal", icon:"🫙", color:"#ffcc44" },
+  { id:"Endocrine", name:"Endocrine", icon:"🩸", color:"#ff7799" },
+  { id:"Antiparasitic", name:"Anti-parasitic", icon:"🔬", color:"#55ddcc" },
+  { id:"Dermatology", name:"Dermatology", icon:"🧴", color:"#ffaa55" },
+];
+
+// ──────────────────────────────────────────────
+// RENDER STARS
+// ──────────────────────────────────────────────
+(function createStars() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 140; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2 + 0.5;
+    s.style.cssText = `
+      width:${sz}px; height:${sz}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --o:${Math.random()*.8+.2};
+      --d:${Math.random()*4+2}s;
+      animation-delay:${Math.random()*4}s;
+    `;
+    sf.appendChild(s);
+  }
+})();
+
+// ──────────────────────────────────────────────
+// RENDER CATEGORIES
+// ──────────────────────────────────────────────
+let activeCategory = "All";
+const catGrid = document.getElementById('cat-grid');
+
+function renderCategories() {
+  catGrid.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const counts = cat.id === "All" ? DRUGS.length : DRUGS.filter(d=>d.category===cat.id).length;
+    const pill = document.createElement('div');
+    pill.className = 'cat-pill' + (cat.id === activeCategory ? ' active' : '');
+    pill.innerHTML = `
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-count">${counts} drug${counts !== 1 ? 's':''}</div>
+    `;
+    pill.onclick = () => {
+      activeCategory = cat.id;
+      renderCategories();
+      filterDrugs();
+    };
+    catGrid.appendChild(pill);
+  });
+}
+
+// ──────────────────────────────────────────────
+// RENDER DRUGS
+// ──────────────────────────────────────────────
+const grid = document.getElementById('drugs-grid');
+
+function renderDrugs(filtered) {
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    document.getElementById('no-results').style.display = 'block';
+    document.getElementById('results-count').textContent = '';
+    return;
+  }
+  document.getElementById('no-results').style.display = 'none';
+  document.getElementById('results-count').textContent =
+    `// Showing ${filtered.length} drug${filtered.length!==1?'s':''} of ${DRUGS.length} total`;
+
+  filtered.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'drug-card';
+    card.style.animationDelay = `${i * 0.03}s`;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="drug-icon">${d.icon}</div>
+        <div>
+          <div class="drug-name">${d.name}</div>
+          <div class="drug-class">${d.class}</div>
+        </div>
+        <div class="drug-num">#${String(d.id).padStart(2,'0')}</div>
+      </div>
+      <div class="card-body">
+        <div class="prop-row"><span class="prop-label">PROPERTIES</span><span class="prop-val">${d.properties}</span></div>
+        <div class="prop-row"><span class="prop-label">STRUCTURE</span><span class="prop-val">${d.structure}</span></div>
+        <div class="prop-row"><span class="prop-label">USES</span><span class="prop-val">${d.uses}</span></div>
+        <div class="prop-row"><span class="prop-label">POSOLOGY</span><span class="prop-val">${d.posology}</span></div>
+        ${d.formula && d.formula !== 'Combination' && d.formula !== 'Polysaccharide mixture' && !d.formula.includes('+') ? `<div class="struct-formula">⬡ ${d.formula}${d.mw ? ' · MW: ' + d.mw : ''}</div>` : ''}
+        <div class="drug-tags">
+          <span class="tag tag-cat">${d.category}</span>
+          ${d.dosageForm.split(',').slice(0,2).map(f=>`<span class="tag tag-form">${f.trim().split('(')[0].trim()}</span>`).join('')}
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ──────────────────────────────────────────────
+// FILTER
+// ──────────────────────────────────────────────
+function filterDrugs() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const filtered = DRUGS.filter(d => {
+    const matchCat = activeCategory === "All" || d.category === activeCategory;
+    const matchSearch = !q ||
+      d.name.toLowerCase().includes(q) ||
+      d.class.toLowerCase().includes(q) ||
+      d.uses.toLowerCase().includes(q) ||
+      d.category.toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+  renderDrugs(filtered);
+}
+
+document.getElementById('search-input').addEventListener('input', filterDrugs);
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+renderCategories();
+renderDrugs(DRUGS);
+
+// ──────────────────────────────────────────────
+// SCROLL ANIMATION
+// ──────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.drug-card').forEach(c => {
+  c.style.opacity = '0';
+  c.style.transform = 'translateY(20px)';
+  c.style.transition = 'opacity .4s ease, transform .4s ease';
+  observer.observe(c);
+});
+</script>
+</body>
+</html>
